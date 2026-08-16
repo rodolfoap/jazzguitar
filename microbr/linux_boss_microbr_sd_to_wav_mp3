@@ -1,0 +1,46 @@
+See /home/rap/git/jazzguitar/microbr/
+
+## Download converter
+
+* https://www.boss.info/global/support/by_product/br-800/updates_drivers/ (BR Series Wave Converter Ver.3.10 for Windows)
+* https://www.boss.info/global/support/by_product/br-800/updates_drivers/2bcd01ab-be10-4184-831b-d909a7116ccc/
+
+## Structure:
+$ tree -d /home/rap/BOSS/BOSS/
+```
+/home/rap/BOSS/BOSS/
+├── MP3
+└── ROLAND
+    └── BR0
+        ├── CARDPRM.BR1
+        ├── DISKINF2.BR0	<-- Important!
+        ├── SONG0035.BR0
+        ├── SONG0054.BR0
+        ├── ...
+        └── SONG0056.BR0
+```
+
+## Build a docker container
+```
+$ cat Dockerfile
+
+FROM i386/ubuntu:latest
+ENV DEBIAN_FRONTEND=noninteractive
+RUN dpkg --add-architecture i386 && \
+    apt-get update && \
+    apt-get install -y wine32 && \
+    rm -rf /var/lib/apt-lists/*
+WORKDIR /app
+CMD ["bash"]
+
+$ docker build -t wine-brwc .
+```
+
+## Sync and run inside docker
+```
+rsync -va --delete /home/rap/BRC/ /home/rap/BOSS/BOSS/
+cd /home/rap/BOSS
+docker run --rm -it --net=host -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v "$HOME/.Xauthority:/root/.Xauthority:ro" -v "$PWD":/app wine-brwc bash
+```
+## Run `winecfg` and in the DRIVES tab, map /app/BOSS to D:
+## Run `wine BRWC.exe`
